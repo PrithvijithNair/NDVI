@@ -1,0 +1,38 @@
+#!/usr/bin/env python
+# coding: utf-8
+
+# In[ ]:
+
+
+import rasterio
+import numpy as np
+
+red_band_path = r"D:\Landsat8\LC08_B4.tif"
+nir_band_path = r"D:\Landsat8\LC08_B5.tif"
+output_ndvi_path = r"D:\Landsat8\NDVI.tif"
+
+with rasterio.open(red_band_path) as red_src:
+    red = red_src.read(1).astype('float32')
+    profile = red_src.profile
+
+with rasterio.open(nir_band_path) as nir_src:
+    nir = nir_src.read(1).astype('float32')
+
+np.seterr(divide='ignore', invalid='ignore')
+
+ndvi = (nir - red) / (nir + red)
+
+profile.update(
+    dtype=rasterio.float32,
+    count=1,
+    nodata=np.nan
+)
+
+with rasterio.open(output_ndvi_path, 'w', **profile) as dst:
+    dst.write(ndvi.astype(rasterio.float32), 1)
+
+print("NDVI raster saved successfully at:", output_ndvi_path)
+
+get_ipython().system('pip install rasterio')
+get_ipython().system('pip install numpy')
+
